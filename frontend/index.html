@@ -1,0 +1,2514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OceanSight AI</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0
+}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f8fc;
+    color:#0b1f3a
+}
+
+header{
+    background:#071a33;
+    padding:20px 28px;
+    border-radius:14px;
+    color:white;
+    margin:18px;
+    border:1px solid #163d66
+}
+
+header h1{
+    font-size:27px
+}
+
+header p{
+    font-size:14px;
+    color:#9fc5e8;
+    margin-top:5px
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:0 18px 40px
+}
+
+.section{
+    margin-top:22px
+}
+
+.section-title{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:10px
+}
+
+.card{
+    background:white;
+    border:1px solid #d8e4ee;
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 3px 12px rgba(0,0,0,.05)
+}
+
+.button-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap
+}
+
+button{
+    border:none;
+    border-radius:7px;
+    padding:12px 20px;
+    font-size:14px;
+    cursor:pointer;
+    background:#0868a8;
+    color:white
+}
+
+button:hover{
+    background:#075789
+}
+
+button.secondary{
+    background:#e8f1f8;
+    color:#174a7a;
+    border:1px solid #c5d8e7
+}
+
+button.active{
+    background:#053e67
+}
+
+.status-box{
+    margin-top:10px;
+    padding:12px 14px;
+    background:#e8f7ef;
+    border-left:5px solid #20a060;
+    border-radius:7px;
+    color:#145c38
+}
+
+.waiting-box{
+    padding:14px;
+    background:#eef4fa;
+    border-radius:8px;
+    color:#345
+}
+
+.error-box{
+    padding:14px;
+    background:#fff1f1;
+    border-left:5px solid #d43b3b;
+    border-radius:8px;
+    color:#7b2020;
+    margin-top:10px
+}
+
+.info-box{
+    padding:14px;
+    background:#eef6fc;
+    border-left:5px solid #0868a8;
+    border-radius:8px;
+    color:#174a7a;
+    margin-top:10px
+}
+
+.sar-controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap
+}
+
+input[type=file]{
+    padding:10px;
+    border:1px solid #ccd9e5;
+    border-radius:7px;
+    background:white
+}
+
+.result-card{
+    margin-top:20px;
+    background:#071a33;
+    color:white;
+    border-radius:14px;
+    padding:20px;
+    border:1px solid #163d66
+}
+
+.result-title{
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:12px
+}
+
+.result-status{
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:16px
+}
+
+.result-status.oil{
+    color:#ffb0b0
+}
+
+.result-status.clear{
+    color:#b7e5ff
+}
+
+.metrics{
+    display:flex;
+    gap:35px;
+    flex-wrap:wrap
+}
+
+.metric-label{
+    font-size:13px;
+    color:#9fc5e8
+}
+
+.metric-value{
+    font-size:17px;
+    margin-top:4px
+}
+
+.sar-view{
+    margin-top:18px;
+    background:#f7fafc;
+    border:1px solid #d8e4ee;
+    border-radius:10px;
+    padding:12px
+}
+
+.sar-view h3{
+    font-size:15px;
+    color:#174a7a;
+    margin-bottom:10px
+}
+
+.sar-images{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px
+}
+
+.sar-images img{
+    width:100%;
+    max-height:480px;
+    object-fit:contain;
+    display:block;
+    border-radius:8px;
+    border:1px solid #cbd9e5;
+    background:#071a33
+}
+
+.caption{
+    font-size:12px;
+    color:#71869a;
+    margin-top:6px
+}
+
+.map-container{
+    height:430px;
+    background:#dceaf5;
+    border-radius:12px;
+    border:1px solid #c4d6e5
+}
+
+.intelligence-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px
+}
+
+.info-card{
+    background:white;
+    border:1px solid #d8e4ee;
+    border-radius:10px;
+    padding:16px
+}
+
+.info-card h3{
+    font-size:15px;
+    color:#174a7a;
+    margin-bottom:10px
+}
+
+.info-value{
+    font-size:20px;
+    font-weight:bold
+}
+
+.info-sub{
+    font-size:12px;
+    color:#71869a;
+    margin-top:5px
+}
+
+.small-note{
+    font-size:12px;
+    color:#71869a;
+    margin-top:8px;
+    line-height:1.45
+}
+
+.hidden{
+    display:none !important
+}
+
+@media(max-width:850px){
+    .intelligence-grid{
+        grid-template-columns:repeat(2,1fr)
+    }
+
+    .sar-images{
+        grid-template-columns:1fr
+    }
+}
+
+@media(max-width:550px){
+    .intelligence-grid{
+        grid-template-columns:1fr
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌊 OceanSight AI</h1>
+    <p>Intelligent Satellite-Based Oil Spill Detection & Prediction</p>
+</header>
+
+<div class="container">
+
+    <!-- MONITORING MODE -->
+    <div class="section">
+        <div class="section-title">1️⃣ MONITORING MODE</div>
+
+        <div class="card">
+
+            <div class="button-row">
+
+                <button
+                    id="manualBtn"
+                    onclick="selectManual()">
+                    📦 Manual Region
+                </button>
+
+                <button
+                    id="automaticBtn"
+                    onclick="selectAutomatic()">
+                    🤖 Automatic Scan
+                </button>
+
+            </div>
+
+            <div id="modeStatus" class="status-box">
+                Select Manual Region or Automatic Scan.
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- SELECTED REGION -->
+    <div class="section">
+
+        <div class="section-title">
+            2️⃣ SELECTED REGION
+        </div>
+
+        <div class="card">
+
+            <div
+                id="regionInfo"
+                class="waiting-box">
+                📦 Waiting for region selection
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SAR ANALYSIS -->
+    <div class="section">
+
+        <div class="section-title">
+            3️⃣ SAR ANALYSIS
+        </div>
+
+        <div class="card">
+
+            <div
+                id="sarControls"
+                class="sar-controls">
+
+                <input
+                    type="file"
+                    id="sarFile"
+                    accept=".jpg,.jpeg,.png,.tif,.tiff">
+
+                <button
+                    id="analyzeBtn"
+                    onclick="analyzeSAR()">
+                    🔍 Check for Any Spill
+                </button>
+
+            </div>
+
+            <div id="analysisStatus"></div>
+
+            <div id="result"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- MAP -->
+    <div class="section">
+
+        <div class="section-title">
+            🗺️ SATELLITE MONITORING MAP
+        </div>
+
+        <div class="card">
+
+            <div
+                id="map"
+                class="map-container">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ENVIRONMENTAL INTELLIGENCE -->
+    <div class="section">
+
+        <div class="section-title">
+            4️⃣ ENVIRONMENTAL INTELLIGENCE
+        </div>
+
+        <div class="intelligence-grid">
+
+            <div class="info-card">
+
+                <h3>🌬️ Wind</h3>
+
+                <div
+                    class="info-value"
+                    id="windSpeed">
+                    —
+                </div>
+
+                <div
+                    class="info-sub"
+                    id="windDirection">
+                    Direction: —
+                </div>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <h3>🌊 Ocean Current</h3>
+
+                <div
+                    class="info-value"
+                    id="currentSpeed">
+                    —
+                </div>
+
+                <div
+                    class="info-sub"
+                    id="currentDirection">
+                    Direction: —
+                </div>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <h3>🚢 Nearby Vessels</h3>
+
+                <div
+                    class="info-value"
+                    id="vesselCount">
+                    —
+                </div>
+
+                <div class="info-sub">
+                    AIS observations
+                </div>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <h3>🧭 Drift Prediction</h3>
+
+                <div
+                    class="info-value"
+                    id="driftStatus">
+                    —
+                </div>
+
+                <div class="info-sub">
+                    Predicted spill movement
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+        <!-- MANUAL VESSEL INTELLIGENCE -->
+    <div
+        class="section hidden"
+        id="manualVesselDetails"
+    >
+
+        <div class="section-title">
+            🚢 VESSEL INTELLIGENCE
+        </div>
+
+        <div class="card">
+
+            <div class="small-note">
+                ⚠️ <b>SIMULATED AIS — MANUAL DEMONSTRATION ONLY</b>
+                <br>
+                Vessel positions and movement trails shown here are simulated
+                for manual-scan demonstration purposes.
+            </div>
+
+            <div
+                class="intelligence-grid"
+                id="vesselDetailsGrid"
+                style="margin-top:14px;"
+            >
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- RISK AND ALERTS -->
+    <div class="section">
+
+        <div class="section-title">
+            5️⃣ RISK & ALERTS
+        </div>
+
+        <div class="intelligence-grid">
+
+            <div class="info-card">
+
+                <h3>⚠️ Risk Level</h3>
+
+                <div
+                    class="info-value"
+                    id="riskLevel">
+                    —
+                </div>
+
+                <div class="info-sub">
+                    Based on detected conditions
+                </div>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <h3>📐 Spill Area</h3>
+
+                <div
+                    class="info-value"
+                    id="spillArea">
+                    —
+                </div>
+
+                <div class="info-sub">
+                    Geographic area
+                </div>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <h3>📍 Coordinates</h3>
+
+                <div
+                    class="info-value"
+                    id="coordinates">
+                    —
+                </div>
+
+                <div class="info-sub">
+                    Detected region
+                </div>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <h3>🔔 Alert Status</h3>
+
+                <div
+                    class="info-value"
+                    id="alertStatus">
+                    —
+                </div>
+
+                <div class="info-sub">
+                    Monitoring notification
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const API_URL = "http://127.0.0.1:8000";
+
+let mode = null;
+let selectedBounds = null;
+let selectionMode = false;
+let rectangle = null;
+let isDrawing = false;
+let startLatLng = null;
+
+
+/* =========================================================
+   MODE BUTTONS
+========================================================= */
+
+function setModeButton(){
+
+    document
+        .getElementById("manualBtn")
+        .classList
+        .toggle("active", mode === "manual");
+
+    document
+        .getElementById("automaticBtn")
+        .classList
+        .toggle("active", mode === "automatic");
+
+    // Toggle live AIS tracking based on selected mode
+    if (mode === "automatic") {
+        const bounds = map.getBounds();
+        startAutoAISTracking({
+            north: bounds.getNorth(),
+            south: bounds.getSouth(),
+            east: bounds.getEast(),
+            west: bounds.getWest()
+        });
+    } else {
+        stopAutoAISTracking();
+    }
+}
+
+
+/* =========================================================
+   MANUAL MODE
+========================================================= */
+
+function selectManual(){
+
+    mode = "manual";
+
+    setModeButton();
+
+    const file =
+        document.getElementById("sarFile");
+
+    file.classList.remove("hidden");
+
+    file.value = "";
+
+    document
+        .getElementById("modeStatus")
+        .innerHTML =
+        "📦 <b>Manual Region Selected</b><br>" +
+        "Draw a rectangle on the satellite map, then upload the SAR image corresponding to that region.";
+
+    document
+        .getElementById("analyzeBtn")
+        .textContent =
+        "🔍 Check for Any Spill";
+
+    document
+        .getElementById("regionInfo")
+        .innerHTML =
+        "📦 <b>Manual monitoring</b><br><br>" +
+        "Draw a rectangle on the map.";
+
+    clearResults();
+}
+
+
+/* =========================================================
+   AUTOMATIC MODE
+========================================================= */
+
+function selectAutomatic(){
+
+    mode = "automatic";
+
+    setModeButton();
+
+    const file =
+        document.getElementById("sarFile");
+
+    /*
+       IMPORTANT:
+       Automatic mode has NO upload control.
+    */
+
+    file.classList.add("hidden");
+
+    file.value = "";
+
+    document
+        .getElementById("modeStatus")
+        .innerHTML =
+        "🤖 <b>Automatic Scan Selected</b><br>" +
+        "Draw a rectangle on the satellite map. " +
+        "The system will automatically retrieve the appropriate Sentinel-1 SAR image.";
+
+    document
+        .getElementById("analyzeBtn")
+        .textContent =
+        "🛰️ Retrieve & Analyze Sentinel-1";
+
+    document
+        .getElementById("regionInfo")
+        .innerHTML =
+        "🤖 <b>Automatic monitoring</b><br><br>" +
+        "Draw a rectangle on the map.";
+
+    clearResults();
+}
+
+
+/* =========================================================
+   CLEAR RESULTS
+========================================================= */
+
+function clearResults(){
+
+    document
+        .getElementById("analysisStatus")
+        .innerHTML = "";
+
+    document
+        .getElementById("result")
+        .innerHTML = "";
+
+    const ids = [
+        "windSpeed",
+        "currentSpeed",
+        "vesselCount",
+        "driftStatus",
+        "riskLevel",
+        "spillArea",
+        "coordinates",
+        "alertStatus"
+    ];
+
+    document
+        .getElementById("manualVesselDetails")
+        .classList
+        .add("hidden");
+
+    document
+        .getElementById("vesselDetailsGrid")
+        .innerHTML = "";
+
+    ids.forEach(id => {
+
+        document
+            .getElementById(id)
+            .textContent = "—";
+
+    });
+
+    document
+        .getElementById("windDirection")
+        .textContent =
+        "Direction: —";
+
+    document
+        .getElementById("currentDirection")
+        .textContent =
+        "Direction: —";
+}
+
+
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
+
+function esc(value){
+
+    return String(value ?? "")
+        .replace(
+            /[&<>"']/g,
+            m =>
+                ({
+                    "&":"&amp;",
+                    "<":"&lt;",
+                    ">":"&gt;",
+                    '"':"&quot;",
+                    "'":"&#039;"
+                }[m])
+        );
+}
+
+
+/* =========================================================
+   NUMBER HELPER
+========================================================= */
+
+function safeNumber(value, fallback = 0){
+
+    const n = Number(value);
+
+    return Number.isFinite(n)
+        ? n
+        : fallback;
+}
+
+
+/* =========================================================
+   FORMAT COORDINATES
+========================================================= */
+
+function formatCoords(region){
+
+    if(!region){
+        return "—";
+    }
+
+    if(
+        region.center_lat == null ||
+        region.center_lon == null
+    ){
+        return "—";
+    }
+
+    return (
+        `${safeNumber(region.center_lat).toFixed(4)}, ` +
+        `${safeNumber(region.center_lon).toFixed(4)}`
+    );
+}
+
+
+/* =========================================================
+   SET SELECTED REGION
+========================================================= */
+
+function setRegion(bounds){
+
+    selectedBounds = {
+
+        north: bounds.getNorth(),
+        south: bounds.getSouth(),
+        east: bounds.getEast(),
+        west: bounds.getWest()
+
+    };
+
+    document
+        .getElementById("regionInfo")
+        .innerHTML =
+
+        "📍 <strong>Selected Region</strong><br><br>" +
+
+        "North: " +
+        selectedBounds.north.toFixed(5) +
+        "<br>" +
+
+        "South: " +
+        selectedBounds.south.toFixed(5) +
+        "<br>" +
+
+        "East: " +
+        selectedBounds.east.toFixed(5) +
+        "<br>" +
+
+        "West: " +
+        selectedBounds.west.toFixed(5) +
+
+        "<br><br>" +
+
+        `<span class="small-note">
+            Area: ${regionArea(selectedBounds).toFixed(3)}
+            km² (rectangle estimate)
+        </span>`;
+}
+
+
+/* =========================================================
+   REGION AREA
+========================================================= */
+
+function regionArea(r){
+
+    const lat =
+        Math.PI *
+        (r.north + r.south) /
+        360;
+
+    const kmLat =
+        111.32 *
+        (r.north - r.south);
+
+    const kmLon =
+        111.32 *
+        Math.cos(lat) *
+        (r.east - r.west);
+
+    return Math.abs(
+        kmLat * kmLon
+    );
+}
+
+
+/* =========================================================
+   RESET MAP SELECTION CONTROL
+========================================================= */
+
+function resetMapSelectionControl(){
+
+    selectionMode = false;
+    isDrawing = false;
+
+    map.dragging.enable();
+
+    map
+        .getContainer()
+        .style
+        .cursor = "";
+
+    const button =
+        document.querySelector(
+            ".region-control-button"
+        );
+
+    if(button){
+
+        button.textContent = "▣";
+
+        button.title =
+            "Select Region";
+    }
+}
+
+
+/* =========================================================
+   REQUIRE REGION
+========================================================= */
+
+function requireRegion(){
+
+    if(!mode){
+
+        alert(
+            "Select Manual Region or Automatic Scan first."
+        );
+
+        return false;
+    }
+
+    if(!selectedBounds){
+
+        alert(
+            "Draw a rectangle on the satellite map first."
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+
+/* =========================================================
+   MAIN ANALYSIS BUTTON
+========================================================= */
+
+async function analyzeSAR(){
+
+    if(!requireRegion()){
+        return;
+    }
+
+
+    /* AUTOMATIC */
+
+    if(mode === "automatic"){
+
+        await automaticScan();
+
+        return;
+    }
+
+
+    /* MANUAL */
+
+    const input =
+        document.getElementById("sarFile");
+
+    if(!input.files.length){
+
+        alert(
+            "Manual Scan requires the SAR image corresponding to the selected region."
+        );
+
+        return;
+    }
+
+
+    const file =
+        input.files[0];
+
+    const form =
+        new FormData();
+
+    form.append(
+        "file",
+        file
+    );
+
+
+    const q =
+        new URLSearchParams({
+
+            north:selectedBounds.north,
+            south:selectedBounds.south,
+            east:selectedBounds.east,
+            west:selectedBounds.west
+
+        });
+
+
+    document
+        .getElementById("analysisStatus")
+        .innerHTML =
+        "<div class='waiting-box'>" +
+        "🛰️ Analyzing uploaded SAR image..." +
+        "</div>";
+
+    document
+        .getElementById("result")
+        .innerHTML = "";
+
+
+    try{
+
+        const response =
+            await fetch(
+                API_URL +
+                "/manual-scan?" +
+                q.toString(),
+                {
+                    method:"POST",
+                    body:form
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(!response.ok){
+
+            throw new Error(
+                data.detail ||
+                "Manual analysis failed."
+            );
+        }
+
+
+        renderResult(data);
+
+
+    }catch(error){
+
+        document
+            .getElementById("analysisStatus")
+            .innerHTML =
+
+            `<div class='error-box'>
+                ⚠️ ${esc(error.message)}
+            </div>`;
+
+        console.error(error);
+    }
+}
+
+
+/* =========================================================
+   AUTOMATIC SCAN
+========================================================= */
+
+async function automaticScan(){
+
+    document
+        .getElementById("analysisStatus")
+        .innerHTML =
+
+        "<div class='waiting-box'>" +
+        "🛰️ Searching for the latest suitable Sentinel-1 SAR acquisition..." +
+        "</div>";
+
+    document
+        .getElementById("result")
+        .innerHTML = "";
+
+
+    try{
+
+        const q =
+            new URLSearchParams({
+
+                north:selectedBounds.north,
+                south:selectedBounds.south,
+                east:selectedBounds.east,
+                west:selectedBounds.west
+
+            });
+
+
+        const response =
+            await fetch(
+                API_URL +
+                "/automatic-scan?" +
+                q.toString(),
+                {
+                    method:"POST"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(!response.ok){
+
+            throw new Error(
+                data.detail ||
+                "Automatic scan failed."
+            );
+        }
+
+
+        /* LAND */
+
+        if(data.status === "land"){
+
+            document
+                .getElementById("analysisStatus")
+                .innerHTML =
+
+                `<div class='error-box'>
+                    🗺️ <b>
+                    ${esc(data.message)}
+                    </b>
+                </div>`;
+
+            return;
+        }
+
+
+        /* CREDENTIALS */
+
+        if(
+            data.status ===
+            "credentials_required"
+        ){
+
+            document
+                .getElementById("analysisStatus")
+                .innerHTML =
+
+                `<div class='info-box'>
+                    🔐 <b>
+                    Automatic Sentinel-1 retrieval is not configured yet.
+                    </b>
+                    <br><br>
+                    ${esc(data.message)}
+                    <br><br>
+                    Manual Scan is ready to use now.
+                </div>`;
+
+            return;
+        }
+
+
+        /* NO SATELLITE */
+
+        if(
+            data.status ===
+            "no_sentinel1"
+        ){
+
+            document
+                .getElementById("analysisStatus")
+                .innerHTML =
+
+                `<div class='info-box'>
+                    🛰️ ${esc(data.message)}
+                </div>`;
+
+            return;
+        }
+
+
+        renderResult(data);
+
+
+    }catch(error){
+
+        document
+            .getElementById("analysisStatus")
+            .innerHTML =
+
+            `<div class='error-box'>
+                ⚠️ ${esc(error.message)}
+            </div>`;
+
+        console.error(error);
+    }
+}
+
+
+/* =========================================================
+   IMAGE VALIDATION
+========================================================= */
+
+function validImageSource(src){
+
+    if(!src){
+        return false;
+    }
+
+    if(
+        typeof src !== "string"
+    ){
+        return false;
+    }
+
+    return (
+        src.startsWith("data:image/") ||
+        src.startsWith("blob:") ||
+        src.startsWith("http://") ||
+        src.startsWith("https://") ||
+        src.startsWith("/")
+    );
+}
+
+
+/* =========================================================
+   RENDER SAR IMAGE
+========================================================= */
+
+function buildSarImage(src, alt){
+
+    if(!validImageSource(src)){
+
+        return `
+            <div class="waiting-box">
+                🛰️ SAR image was analyzed, but no display image
+                was returned by the backend.
+            </div>
+        `;
+    }
+
+    return `
+        <img
+            src="${esc(src)}"
+            alt="${esc(alt)}"
+            loading="lazy"
+        >
+    `;
+}
+
+
+/* =========================================================
+   RENDER RESULT
+========================================================= */
+
+function renderResult(data){
+
+// Clear and draw manual AIS vessels with dashed trails
+    if (!window.manualAisLayer) {
+        window.manualAisLayer = L.layerGroup().addTo(map);
+    } else {
+        window.manualAisLayer.clearLayers();
+    }
+
+    if (data.ais && Array.isArray(data.ais.vessels)) {
+        data.ais.vessels.forEach(vessel => {
+            // 1. Draw dashed historical trail line
+            if (vessel.trail && vessel.trail.length > 1) {
+                L.polyline(vessel.trail, {
+                    color: '#38bdf8',
+                    weight: 3,
+                    dashArray: '6, 6',
+                    opacity: 0.85
+                }).addTo(window.manualAisLayer);
+            }
+
+            // 2. Place vessel marker at current position
+            if (vessel.lat && vessel.lon) {
+                L.marker([vessel.lat, vessel.lon])
+                    .bindPopup(`<b>🚢 ${vessel.name || "Unknown"}</b><br>MMSI: ${vessel.mmsi || "N/A"}`)
+                    .addTo(window.manualAisLayer);
+            }
+        });
+    }
+
+    document
+        .getElementById("analysisStatus")
+        .innerHTML = "";
+
+
+    /*
+       IMPORTANT:
+       The result comes from the backend/model.
+       Nothing here forces Oil Spill.
+    */
+
+    const spill =
+        data.spill_detected === true;
+
+
+    const confidenceRaw =
+        safeNumber(data.confidence, 0);
+
+    const probabilityRaw =
+        safeNumber(data.oil_probability, 0);
+
+
+    const confidence =
+        (
+            confidenceRaw * 100
+        ).toFixed(2);
+
+
+    const oilProbability =
+        (
+            probabilityRaw * 100
+        ).toFixed(2);
+
+
+    /*
+       Support both expected backend field names.
+    */
+
+    const original =
+        data.original_image ||
+        data.image ||
+        data.sar_image ||
+        null;
+
+
+    const annotated =
+        data.annotated_image ||
+        data.annotated_sar ||
+        data.image ||
+        original ||
+        null;
+
+
+    const status =
+        spill
+            ? "🛢️ OIL SPILL DETECTED"
+            : "🌊 NO OIL SPILL DETECTED";
+
+
+    const boundary =
+        spill &&
+        (
+            data.candidate_boundary === true ||
+            data.candidate_boundary === "true"
+        );
+
+
+    document
+        .getElementById("result")
+        .innerHTML =
+
+        `
+        <div class="result-card">
+
+            <div class="result-title">
+                🛰️ SAR ANALYSIS RESULT
+            </div>
+
+
+            <div class="result-status ${
+                spill ? "oil" : "clear"
+            }">
+
+                ${status}
+
+            </div>
+
+
+            <div class="metrics">
+
+                <div>
+                    <div class="metric-label">
+                        CONFIDENCE
+                    </div>
+
+                    <div class="metric-value">
+                        ${confidence}%
+                    </div>
+                </div>
+
+
+                <div>
+                    <div class="metric-label">
+                        OIL PROBABILITY
+                    </div>
+
+                    <div class="metric-value">
+                        ${oilProbability}%
+                    </div>
+                </div>
+
+
+                <div>
+                    <div class="metric-label">
+                        MODEL
+                    </div>
+
+                    <div class="metric-value">
+                        ${esc(
+                            data.model ||
+                            "MobileNetV2"
+                        )}
+                    </div>
+                </div>
+
+
+                <div>
+                    <div class="metric-label">
+                        INPUT
+                    </div>
+
+                    <div class="metric-value">
+                        ${esc(
+                            data.input_size ||
+                            "224 × 224"
+                        )}
+                    </div>
+                </div>
+
+
+                <div>
+                    <div class="metric-label">
+                        MODE
+                    </div>
+
+                    <div class="metric-value">
+                        ${esc(
+                            data.mode ||
+                            mode
+                        )}
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- SAR VISUALIZATION -->
+
+            <div class="sar-view">
+
+                <h3>
+                    🛰️ SAR IMAGE
+                </h3>
+
+
+                <div class="sar-images">
+
+                    <div>
+
+                        ${buildSarImage(
+                            original,
+                            "Original SAR image"
+                        )}
+
+                        <div class="caption">
+                            SAR image used for analysis
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        ${buildSarImage(
+                            annotated,
+                            "SAR image with detected spill boundary"
+                        )}
+
+                        <div class="caption">
+
+                            ${
+                                boundary
+                                ?
+                                "🔴 Red boundary = detected oil-spill candidate region"
+                                :
+                                spill
+                                ?
+                                "Oil spill detected; no candidate boundary image was returned."
+                                :
+                                "No spill boundary shown because no oil spill was detected."
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="small-note">
+                    ${esc(
+                        data.note ||
+                        "SAR image processed using the trained MobileNetV2 pipeline."
+                    )}
+                </div>
+
+            </div>
+
+
+            ${
+                data.satellite
+                ?
+                `
+                <div class="sar-view">
+
+                    <h3>
+                        🛰️ SATELLITE INFORMATION
+                    </h3>
+
+                    <div class="small-note">
+
+                        <b>Source:</b>
+                        ${esc(
+                            data.satellite.name ||
+                            data.satellite.id ||
+                            "Sentinel-1"
+                        )}
+
+                        <br>
+
+                        <b>Acquisition:</b>
+                        ${esc(
+                            data.satellite.datetime ||
+                            "—"
+                        )}
+
+                    </div>
+
+                </div>
+                `
+                :
+                ""
+            }
+
+        </div>
+        `;
+
+    
+
+        
+    /* =====================================================
+       REGION
+    ===================================================== */
+
+    const region =
+        data.region || {};
+
+
+    document
+        .getElementById("coordinates")
+        .textContent =
+        formatCoords(region);
+
+
+    /* =====================================================
+       AREA
+    ===================================================== */
+
+    if(spill){
+
+        if(data.georeferenced){
+
+            document
+                .getElementById("spillArea")
+                .textContent =
+                `${safeNumber(
+                    region.area_km2
+                ).toFixed(3)} km²`;
+
+        }else{
+
+            const pixels =
+                safeNumber(
+                    data.candidate_area_pixels,
+                    0
+                );
+
+            document
+                .getElementById("spillArea")
+                .textContent =
+                pixels > 0
+                    ? `${pixels.toFixed(0)} px² candidate`
+                    : "Detected";
+        }
+
+    }else{
+
+        document
+            .getElementById("spillArea")
+            .textContent =
+            "None detected";
+    }
+
+
+    /* =====================================================
+       ENVIRONMENT
+    ===================================================== */
+
+    const environment =
+        data.environment || {};
+
+
+    if(environment.wind){
+
+        const speed =
+            environment.wind.speed_kmh;
+
+        document
+            .getElementById("windSpeed")
+            .textContent =
+            speed == null
+                ? "—"
+                : `${safeNumber(speed).toFixed(1)} km/h`;
+
+
+        document
+            .getElementById("windDirection")
+            .textContent =
+            `Direction: ${
+                directionText(
+                    environment.wind.direction_deg
+                )
+            }`;
+    }
+
+
+    if(environment.current){
+
+        const speed =
+            environment.current.speed_ms;
+
+        document
+            .getElementById("currentSpeed")
+            .textContent =
+            speed == null
+                ? "—"
+                : `${safeNumber(speed).toFixed(2)} m/s`;
+
+
+        document
+            .getElementById("currentDirection")
+            .textContent =
+            `Direction: ${
+                directionText(
+                    environment.current.direction_deg
+                )
+            }`;
+    }
+
+
+    /* =====================================================
+       AIS
+    ===================================================== */
+
+    if(data.ais){
+
+        if(data.ais.vessels){
+
+            document
+                .getElementById("vesselCount")
+                .textContent =
+                `${data.ais.vessels.length} vessels`;
+
+        }else if(data.ais.count != null){
+
+            document
+                .getElementById("vesselCount")
+                .textContent =
+                `${data.ais.count} vessels`;
+
+        }else if(data.ais.configured){
+
+            document
+                .getElementById("vesselCount")
+                .textContent =
+                "AIS configured";
+
+        }else{
+
+            document
+                .getElementById("vesselCount")
+                .textContent =
+                "Not configured";
+        }
+
+    }else{
+
+        document
+            .getElementById("vesselCount")
+            .textContent =
+            "Not available";
+    }
+
+    /* =====================================================
+    MANUAL VESSEL INTELLIGENCE
+    ===================================================== */
+
+    const vesselSection =
+        document.getElementById(
+            "manualVesselDetails"
+        );
+
+    const vesselGrid =
+        document.getElementById(
+            "vesselDetailsGrid"
+        );
+
+    if(
+        mode === "manual" &&
+        data.ais &&
+        Array.isArray(data.ais.vessels) &&
+        data.ais.vessels.length > 0
+    ){
+
+        vesselGrid.innerHTML =
+            data.ais.vessels.map(vessel => {
+
+                return `
+                    <div class="info-card">
+
+                        <h3>
+                            🚢 ${esc(
+                                vessel.name ||
+                                "Unknown Vessel"
+                            )}
+                        </h3>
+
+                        <div class="info-value">
+                            ${esc(
+                                vessel.type ||
+                                "Unknown Type"
+                            )}
+                        </div>
+
+                        <div class="info-sub">
+                            MMSI:
+                            ${esc(
+                                vessel.mmsi ||
+                                "N/A"
+                            )}
+                        </div>
+
+                        <div class="info-sub">
+                            Speed:
+                            ${safeNumber(
+                                vessel.speed_knots,
+                                0
+                            ).toFixed(1)}
+                            knots
+                        </div>
+
+                        <div class="info-sub">
+                            Heading:
+                            ${safeNumber(
+                              vessel.heading,
+                                0
+                            ).toFixed(0)}°
+                        </div>
+
+                        <div class="info-sub">
+                            Destination:
+                            ${esc(
+                              vessel.destination ||
+                                "Unknown"
+                            )}
+                        </div>
+
+                    </div>
+                `;
+
+            }).join("");
+
+        vesselSection
+            .classList
+            .remove("hidden");
+
+    }else{
+
+        vesselSection
+            .classList
+            .add("hidden");
+
+        vesselGrid.innerHTML = "";
+
+    }
+
+    /* =====================================================
+       DRIFT
+    ===================================================== */
+
+    if(data.drift){
+
+        const distance =
+            safeNumber(
+                data.drift.distance_km,
+                0
+            );
+
+        const hours =
+            safeNumber(
+                data.drift.hours,
+                1
+            );
+
+        document
+            .getElementById("driftStatus")
+            .textContent =
+            `${distance.toFixed(2)} km / ${hours}h`;
+
+    }else if(spill){
+
+        document
+            .getElementById("driftStatus")
+            .textContent =
+            "Unavailable";
+
+    }else{
+
+        document
+            .getElementById("driftStatus")
+            .textContent =
+            "Not applicable";
+    }
+
+
+    /* =====================================================
+       RISK
+    ===================================================== */
+
+    document
+        .getElementById("riskLevel")
+        .textContent =
+        spill
+            ? riskLabel(data)
+            : "Low";
+
+
+    /* =====================================================
+       ALERT
+    ===================================================== */
+
+    document
+        .getElementById("alertStatus")
+        .textContent =
+        spill
+            ? "Alert condition"
+            : "No alert";
+
+
+    /* =====================================================
+       SATELLITE INFO IN REGION CARD
+    ===================================================== */
+
+    if(data.satellite){
+
+        const satelliteName =
+            data.satellite.name ||
+            data.satellite.id ||
+            "Sentinel-1";
+
+
+        const acquisition =
+            data.satellite.datetime ||
+            "";
+
+
+        document
+            .getElementById("regionInfo")
+            .innerHTML +=
+
+            `<br><br>
+
+            🛰️ <b>
+            Sentinel-1 acquisition
+            </b>
+
+            <br>
+
+            ${esc(
+                satelliteName
+            )}
+
+            <br>
+
+            <span class="small-note">
+                ${esc(
+                    acquisition
+                )}
+            </span>`;
+    }
+}
+
+
+
+/* =========================================================
+   WIND / CURRENT DIRECTION
+========================================================= */
+
+function directionText(deg){
+
+    if(deg == null){
+        return "—";
+    }
+
+
+    const names = [
+        "N",
+        "NE",
+        "E",
+        "SE",
+        "S",
+        "SW",
+        "W",
+        "NW"
+    ];
+
+
+    const index =
+        Math.round(
+            safeNumber(deg) / 45
+        ) % 8;
+
+
+    return `${
+        names[index]
+    } (${
+        safeNumber(deg).toFixed(0)
+    }°)`;
+}
+
+
+/* =========================================================
+   RISK
+========================================================= */
+
+function riskLabel(data){
+
+    const probability =
+        safeNumber(
+            data.oil_probability,
+            0
+        );
+
+
+    if(probability >= 0.85){
+        return "High";
+    }
+
+
+    if(probability >= 0.65){
+        return "Moderate";
+    }
+
+
+    return "Low";
+}
+
+
+/* =========================================================
+   MAP
+========================================================= */
+
+const map =
+    L.map("map")
+    .setView(
+        [20,78],
+        4
+    );
+
+
+/* =========================================================
+   SATELLITE MAP
+========================================================= */
+
+L.tileLayer(
+
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+
+    {
+        attribution:
+        "Tiles &copy; Esri"
+    }
+
+).addTo(map);
+
+/* =========================================================
+   AUTOMATIC REAL-TIME AIS TRACKING
+========================================================= */
+
+let autoAisInterval = null;
+
+const autoAisLayer =
+    L.layerGroup().addTo(map);
+
+const autoLiveVessels = {};
+
+
+function startAutoAISTracking(bounds){
+
+    if(autoAisInterval){
+        clearInterval(autoAisInterval);
+    }
+
+
+    async function fetchLiveAIS(){
+
+        try{
+
+            const q =
+                new URLSearchParams({
+
+                    north: bounds.north,
+                    south: bounds.south,
+                    east: bounds.east,
+                    west: bounds.west
+
+                });
+
+
+            const response =
+                await fetch(
+                    API_URL +
+                    "/automatic-scan?" +
+                    q.toString(),
+                    {
+                        method:"POST"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if(
+                data.ais &&
+                Array.isArray(data.ais.vessels)
+            ){
+
+                updateAutoAIS(
+                    data.ais.vessels
+                );
+
+            }
+
+        }catch(error){
+
+            console.error(
+                "Auto AIS error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    fetchLiveAIS();
+
+
+    autoAisInterval =
+        setInterval(
+            fetchLiveAIS,
+            10000
+        );
+}
+
+
+function stopAutoAISTracking(){
+
+    if(autoAisInterval){
+
+        clearInterval(
+            autoAisInterval
+        );
+
+        autoAisInterval = null;
+    }
+
+
+    autoAisLayer.clearLayers();
+
+
+    Object.keys(
+        autoLiveVessels
+    ).forEach(id => {
+
+        delete autoLiveVessels[id];
+
+    });
+}
+
+
+function updateAutoAIS(vessels){
+
+    vessels.forEach(vessel => {
+
+        if(
+            vessel.lat == null ||
+            vessel.lon == null
+        ){
+            return;
+        }
+
+
+        const id =
+            vessel.mmsi ||
+            vessel.name ||
+            "unknown";
+
+
+        const currentPos = [
+
+            Number(vessel.lat),
+            Number(vessel.lon)
+
+        ];
+
+
+        if(
+            !autoLiveVessels[id]
+        ){
+
+            const trailPath =
+                vessel.trail &&
+                vessel.trail.length > 0
+
+                ? vessel.trail
+
+                : [currentPos];
+
+
+            const polyline =
+                L.polyline(
+
+                    trailPath,
+
+                    {
+                        color:"#ef4444",
+                        weight:3,
+                        opacity:0.9
+                    }
+
+                ).addTo(
+                    autoAisLayer
+                );
+
+
+            const marker =
+                L.marker(
+                    currentPos
+                )
+                .bindPopup(
+
+                    `<b>🚢 ${
+                        vessel.name ||
+                        "Unknown"
+                    }</b><br>
+                    MMSI: ${
+                        vessel.mmsi ||
+                        "N/A"
+                    }`
+
+                )
+                .addTo(
+                    autoAisLayer
+                );
+
+
+            autoLiveVessels[id] = {
+
+                marker,
+                polyline,
+                path:trailPath
+
+            };
+
+
+        }else{
+
+            const ship =
+                autoLiveVessels[id];
+
+
+            const lastPos =
+                ship.path[
+                    ship.path.length - 1
+                ];
+
+
+            if(
+                lastPos[0] !== currentPos[0] ||
+                lastPos[1] !== currentPos[1]
+            ){
+
+                ship.path.push(
+                    currentPos
+                );
+
+
+                ship.polyline.setLatLngs(
+                    ship.path
+                );
+
+
+                ship.marker.setLatLng(
+                    currentPos
+                );
+
+            }
+
+        }
+
+    });
+}
+
+
+/* =========================================================
+   REGION SELECTOR CONTROL
+========================================================= */
+
+const RegionControl =
+    L.Control.extend({
+
+        options:{
+            position:"topleft"
+        },
+
+
+        onAdd:function(map){
+
+            const container =
+                L.DomUtil.create(
+                    "div",
+                    "leaflet-bar leaflet-control"
+                );
+
+
+            const button =
+                L.DomUtil.create(
+                    "a",
+                    "region-control-button",
+                    container
+                );
+
+
+            button.innerHTML =
+                "▣";
+
+
+            button.title =
+                "Select Region";
+
+
+            button.href =
+                "#";
+
+
+            button.style.width =
+                "34px";
+
+
+            button.style.height =
+                "34px";
+
+
+            button.style.lineHeight =
+                "34px";
+
+
+            button.style.textAlign =
+                "center";
+
+
+            button.style.fontSize =
+                "20px";
+
+
+            button.style.cursor =
+                "pointer";
+
+
+            L.DomEvent
+                .disableClickPropagation(
+                    container
+                );
+
+
+            button.onclick =
+                function(e){
+
+                    e.preventDefault();
+
+
+                    selectionMode =
+                        !selectionMode;
+
+
+                    if(selectionMode){
+
+                        button.innerHTML =
+                            "✕";
+
+                        button.title =
+                            "Exit Region Selection";
+
+                        map
+                            .getContainer()
+                            .style
+                            .cursor =
+                            "crosshair";
+
+                    }else{
+
+                        button.innerHTML =
+                            "▣";
+
+                        button.title =
+                            "Select Region";
+
+                        map
+                            .getContainer()
+                            .style
+                            .cursor =
+                            "";
+
+                        map
+                            .dragging
+                            .enable();
+                    }
+                };
+
+
+            return container;
+        }
+
+    });
+
+
+map.addControl(
+    new RegionControl()
+);
+
+
+/* =========================================================
+   START DRAWING
+========================================================= */
+
+map.on(
+    "mousedown",
+    function(e){
+
+        if(!selectionMode){
+            return;
+        }
+
+
+        isDrawing =
+            true;
+
+
+        startLatLng =
+            e.latlng;
+
+
+        map
+            .dragging
+            .disable();
+
+
+        if(rectangle){
+
+            map.removeLayer(
+                rectangle
+            );
+        }
+
+
+        rectangle =
+            L.rectangle(
+
+                [
+                    startLatLng,
+                    startLatLng
+                ],
+
+                {
+                    color:"#00a6ff",
+                    weight:2,
+                    fillOpacity:.15
+                }
+
+            ).addTo(map);
+
+    }
+);
+
+
+/* =========================================================
+   DRAW RECTANGLE
+========================================================= */
+
+map.on(
+    "mousemove",
+    function(e){
+
+        if(
+            !selectionMode ||
+            !isDrawing
+        ){
+            return;
+        }
+
+
+        rectangle.setBounds(
+
+            L.latLngBounds(
+                startLatLng,
+                e.latlng
+            )
+
+        );
+
+    }
+);
+
+
+/* =========================================================
+   FINISH RECTANGLE
+========================================================= */
+
+map.on(
+    "mouseup",
+    function(){
+
+        if(
+            !selectionMode ||
+            !isDrawing
+        ){
+            return;
+        }
+
+
+        isDrawing =
+            false;
+
+
+        map
+            .dragging
+            .enable();
+
+
+        const bounds =
+            rectangle.getBounds();
+
+
+        setRegion(
+            bounds
+        );
+
+
+        resetMapSelectionControl();
+
+    }
+);
+
+
+/* =========================================================
+   MOUSE OUT
+========================================================= */
+
+map.on(
+    "mouseout",
+    function(){
+
+        /*
+           Intentionally keep the current rectangle stable
+           if the pointer briefly leaves the map.
+        */
+
+    }
+);
+
+</script>
+
+</body>
+</html>
